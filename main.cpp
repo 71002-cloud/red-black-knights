@@ -18,6 +18,7 @@ public:
 class Board {
 public:
     int size;
+    int number_of_squares;
     std::vector<int> board;
     std::unordered_map<int, Knight> knights;
 
@@ -42,7 +43,7 @@ public:
             return;
         }
 
-        const int number_of_squares = size * size;
+        number_of_squares = size * size;
         board.reserve(number_of_squares);
         for (int square = 0; square < number_of_squares; ++square) {
             board.push_back(square);
@@ -50,7 +51,7 @@ public:
     }
 
     int m(int k) const {
-        return static_cast<int>(std::pow(2 * k + 1, 2)) - 1;
+        return (2 * k + 1) * (2 * k + 1) - 1;
     }
 
     std::pair<int, int> number_to_cords(int n) const {
@@ -157,7 +158,7 @@ public:
     int number_of_knights;
     int turn = 0;
     std::vector<std::string> knight_colors;
-    std::unordered_map<std::string, int> knights_next_moves;
+    std::array<std::pair<std::string, int>, 8> knights_next_moves;
 
     Game(int number, int board_size)
         : board(board_size), number_of_knights(number) {
@@ -170,33 +171,36 @@ public:
     }
 
     void initialize_next_moves() {
+        int i = 0;
         for (const auto& color : knight_colors) {
-            knights_next_moves[color] = 0;
+            knights_next_moves[i].first = color;
+            knights_next_moves[i].second = 0;
+            i++;
         }
     }
 
     void initialize_number_of_knights() {
-        const int count = number_of_knights < 0
+        number_of_knights = number_of_knights < 0
                               ? 0
                               : (number_of_knights >= 8 ? 8 : number_of_knights);
         const std::vector<std::string> colors = {
             "red", "black", "green", "blue",
             "pink", "yellow", "purple", "orange"};
-        knight_colors.assign(colors.begin(), colors.begin() + count);
+        knight_colors.assign(colors.begin(), colors.begin() + number_of_knights);
     }
 
     void next_turn() {
         ++turn;
-        if (turn >= static_cast<int>(knight_colors.size())) {
+        if (turn >= number_of_knights) {
             turn = 0;
         }
     }
 
     bool try_place_knight() {
         const std::string& color = knight_colors[turn];
-        int& square = knights_next_moves[color];
+        int& square = knights_next_moves[turn].second;
 
-        while (square < static_cast<int>(board.board.size())) {
+        while (square < board.number_of_squares) {
             if (board.add_knight(square, color)) {
                 ++square;
                 next_turn();
@@ -218,16 +222,15 @@ int main() {
     }
     auto end_of_game = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double> game_time = end_of_game - start;
-    /* The output is remove since I know what it does
     game.board.print_knights(); // Output - It is changed to make a file for faster output
 
     auto end = std::chrono::high_resolution_clock::now();
 
-    std::chrono::duration<double> print_time = end - end_of_game; */
+    std::chrono::duration<double> print_time = end - end_of_game;
     std::chrono::duration<double> total_time = end - start;
 
-    std::cout << "Time spend on game: " << game_time.count() << " seconds" << std::endl;
-    // std::cout << "Time spend on printing: " << print_time.count() << " seconds" << std::endl;
-    std::cout << "Time spend: " << total_time.count() << " seconds" << std::endl;
+    std::cout << "Time spend on game: " << game_time.count() << " seconds" <<"\n";
+    std::cout << "Time spend on printing: " << print_time.count() << " seconds" <<"\n";
+    std::cout << "Time spend: " << total_time.count() << " seconds" <<"\n";
     return 0;
 }

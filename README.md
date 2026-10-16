@@ -3,7 +3,11 @@
 C++ version of my [red_and_black_knights](https://github.com/71002-cloud/solution/tree/master/projects) Python project.
 
 It places colored knights on a numbered board. Writing the result to
-`knights.txt` is currently commented out in `main()`.
+`knights.txt` is enabled in `main()`.
+
+The number of knights and board size are configured when constructing the
+`Game` object. The current implementation supports up to eight knights,
+using the available colors in order.
 
 ## Build and run
 
