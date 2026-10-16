@@ -59,7 +59,7 @@ public:
             return {0, 1};
         }
 
-        const int k = static_cast<int>(std::ceil((std::sqrt(n) - 1) / 2));
+        const int k = static_cast<int>((std::sqrt(n) + 1) / 2);
         const int d = m(k) - n;
         int x;
         int y;
