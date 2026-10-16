@@ -19,4 +19,4 @@ g++ main.cpp -o main.exe
 ```
 
 The example in `main()` uses two knight colors on a board with size `3001`.
-This C++ version is approximately five times faster than the Python version.
+`knights.txt` prints occupied squares in ascending square-number order.

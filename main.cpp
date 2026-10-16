@@ -9,18 +9,11 @@
 #include <fstream>
 #include <array>
 
-class Knight {
-public:
-    std::string color;
-    int square;
-};
-
 class Board {
 public:
     int size;
     int number_of_squares;
     std::vector<int> board;
-    std::unordered_map<int, Knight> knights;
 
     static constexpr std::array<std::pair<int, int>, 8> moves = {{
             {2,1},
@@ -46,7 +39,7 @@ public:
         number_of_squares = size * size;
         board.reserve(number_of_squares);
         for (int square = 0; square < number_of_squares; ++square) {
-            board.push_back(square);
+            board.push_back(-1); // -1 indicates an empty square
         }
     }
 
@@ -107,8 +100,8 @@ public:
         return n;
     }
 
-    bool can_place_knight(int square, const std::string& color) {
-        if (knights.find(square) != knights.end()) {
+    bool can_place_knight(int square, int color) {
+        if (board[square] != -1) {
             return false;
         }
 
@@ -120,32 +113,38 @@ public:
 
             int number = cords_to_number({x, y});
 
+            int knight = -1;
 
-            auto knight = knights.find(number);
-            if (knight != knights.end()) {
+            if (number >= 0 && number < number_of_squares) {
+                knight = board[number];
+            }
 
-                if (knight->second.color != color) {
-                    return false;
-                }
+            if (knight != -1 && knight != color) {
+                return false;
             }
         }
 
         return true;
     }
 
-    bool add_knight(int square, const std::string& color) {
+    bool add_knight(int square, int color) {
         if (!can_place_knight(square, color)) {
             return false;
         }
 
-        knights[square] = Knight{color, square};
+        board[square] = color;
         return true;
     }
 
     void print_knights() {
+        const std::vector<std::string> colors = {
+            "red", "black", "green", "blue",
+            "pink", "yellow", "purple", "orange"};
         std::ofstream output("knights.txt");
-        for (const auto& knight : knights) {
-            output << "Square " << std::setw(4) << knight.first << " | " << knight.second.color << "\n";
+        for (int i = 0; i < number_of_squares; ++i) {
+            if (board[i] != -1) {
+                output << "Square " << std::setw(4) << i << " | " << colors[board[i]] << "\n";
+            }
         }
         // Write the output to a file - Is 68 secounds faster than printing when we are using 3001 as size
         //std::cout << output.str();
@@ -157,36 +156,23 @@ public:
     Board board;
     int number_of_knights;
     int turn = 0;
-    std::vector<std::string> knight_colors;
-    std::array<std::pair<std::string, int>, 8> knights_next_moves;
+    std::array<std::pair<int, int>, 8> knights_next_moves;
 
     Game(int number, int board_size)
         : board(board_size), number_of_knights(number) {
-        initialize();
-    }
-
-    void initialize() {
         initialize_number_of_knights();
         initialize_next_moves();
     }
 
     void initialize_next_moves() {
-        int i = 0;
-        for (const auto& color : knight_colors) {
-            knights_next_moves[i].first = color;
+        for (int i = 0; i < number_of_knights; ++i) {
+            knights_next_moves[i].first = i; // Assign the color to the first element of the pair
             knights_next_moves[i].second = 0;
-            i++;
         }
     }
 
     void initialize_number_of_knights() {
-        number_of_knights = number_of_knights < 0
-                              ? 0
-                              : (number_of_knights >= 8 ? 8 : number_of_knights);
-        const std::vector<std::string> colors = {
-            "red", "black", "green", "blue",
-            "pink", "yellow", "purple", "orange"};
-        knight_colors.assign(colors.begin(), colors.begin() + number_of_knights);
+        number_of_knights = number_of_knights < 0 ? 0 : (number_of_knights >= 8 ? 8 : number_of_knights);
     }
 
     void next_turn() {
@@ -197,7 +183,10 @@ public:
     }
 
     bool try_place_knight() {
-        const std::string& color = knight_colors[turn];
+        if (number_of_knights <= 0) {
+            return false;
+        }
+        const int color = turn;
         int& square = knights_next_moves[turn].second;
 
         while (square < board.number_of_squares) {
