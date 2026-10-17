@@ -1,7 +1,6 @@
 #include <cmath>
 #include <iostream>
 #include <string>
-#include <unordered_map>
 #include <utility>
 #include <vector>
 #include <iomanip>
@@ -38,9 +37,7 @@ public:
 
         number_of_squares = size * size;
         board.reserve(number_of_squares);
-        for (int square = 0; square < number_of_squares; ++square) {
-            board.push_back(-1); // -1 indicates an empty square
-        }
+        board.assign(number_of_squares, -1); // -1 indicates that the square is empty
     }
 
     int m(int k) const {
@@ -100,7 +97,7 @@ public:
         return n;
     }
 
-    bool can_place_knight(int square, int color) {
+    bool can_place_knight(int square, int color) const {
         if (board[square] != -1) {
             return false;
         }
