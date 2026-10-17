@@ -76,8 +76,8 @@ public:
     int cords_to_number(std::pair<int, int> cords) const {
         const int x = cords.first;
         const int y = cords.second;
-        int ax = std::abs(x);
-        int ay = std::abs(y);
+        const int ax = std::abs(x);
+        const int ay = std::abs(y);
         int k;
         int n;
 
@@ -102,13 +102,13 @@ public:
             return false;
         }
 
-        auto position = number_to_cords(square);
+        const auto position = number_to_cords(square);
 
         for (const auto& move : moves) {
-            int x = position.first + move.first;
-            int y = position.second + move.second;
+            const int x = position.first + move.first;
+            const int y = position.second + move.second;
 
-            int number = cords_to_number({x, y});
+            const int number = cords_to_number({x, y});
 
             int knight = -1;
 
@@ -134,7 +134,7 @@ public:
     }
 
     void print_knights() {
-        const std::vector<std::string> colors = {
+        const std::array<std::string, 8> colors = {
             "red", "black", "green", "blue",
             "pink", "yellow", "purple", "orange"};
         std::ofstream output("knights.txt");
@@ -199,21 +199,21 @@ public:
 };
 // Most in this function is for timing
 int main() {
-    auto start = std::chrono::high_resolution_clock::now();
+    const auto start = std::chrono::high_resolution_clock::now();
     // Create the game
     Game game(2, 3001); // Takes (number_of_knights, board_size) board size a grid with max number = size^2 - 1 recomend keeping it to odd numbers for better results
     // Run the game
     while (game.try_place_knight()) {
         // Keep trying to place knights until no more can be placed
     }
-    auto end_of_game = std::chrono::high_resolution_clock::now();
-    std::chrono::duration<double> game_time = end_of_game - start;
+    const auto end_of_game = std::chrono::high_resolution_clock::now();
+    const std::chrono::duration<double> game_time = end_of_game - start;
     game.board.print_knights(); // Output - It is changed to make a file for faster output
 
-    auto end = std::chrono::high_resolution_clock::now();
+    const auto end = std::chrono::high_resolution_clock::now();
 
-    std::chrono::duration<double> print_time = end - end_of_game;
-    std::chrono::duration<double> total_time = end - start;
+    const std::chrono::duration<double> print_time = end - end_of_game;
+    const std::chrono::duration<double> total_time = end - start;
 
     std::cout << "Time spend on game: " << game_time.count() << " seconds" <<"\n";
     std::cout << "Time spend on printing: " << print_time.count() << " seconds" <<"\n";
