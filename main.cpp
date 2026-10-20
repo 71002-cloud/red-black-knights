@@ -13,7 +13,7 @@ public:
     int size;
     int number_of_squares;
     std::vector<int> board;
-
+    // The eight possible moves of a knight in chess.
     static constexpr std::array<std::pair<int, int>, 8> moves = {{
             {2,1},
             {2,-1},
@@ -34,22 +34,25 @@ public:
         if (size <= 0) {
             return;
         }
-
+        // Calculate the total number of squares on the board.
         number_of_squares = size * size;
         board.reserve(number_of_squares);
-        board.assign(number_of_squares, -1); // -1 indicates that the square is empty
+        board.assign(number_of_squares, -1); // -1 indicates that a square is empty.
     }
 
+    // Return the largest number in spiral ring k.
     int m(int k) const {
         return (2 * k + 1) * (2 * k + 1) - 1;
     }
 
+    // Convert a spiral square number into x and y coordinates.
     std::pair<int, int> number_to_cords(int n) const {
         if (n == 1) {
             return {0, 1};
         }
-
+        // Calculate which spiral ring the square belongs to (k).
         const int k = static_cast<int>((std::sqrt(n) + 1) / 2);
+        // Calculate how many squares n is from the end of the ring (d).
         const int d = m(k) - n;
         int x;
         int y;
@@ -73,6 +76,7 @@ public:
         return {x, y};
     }
 
+    // Convert x and y coordinates back into a spiral square number.
     int cords_to_number(std::pair<int, int> cords) const {
         const int x = cords.first;
         const int y = cords.second;
@@ -116,6 +120,7 @@ public:
                 knight = board[number];
             }
 
+            // A knight may be next to one of the same color, but not one of a different color.
             if (knight != -1 && knight != color) {
                 return false;
             }
@@ -138,12 +143,17 @@ public:
             "red", "black", "green", "blue",
             "pink", "yellow", "purple", "orange"};
         std::ofstream output("knights.txt");
+        if (!output) {
+            std::cerr << "Error opening file for writing.\n";
+            return;
+        }
         for (int i = 0; i < number_of_squares; ++i) {
             if (board[i] != -1) {
                 output << "Square " << std::setw(4) << i << " | " << colors[board[i]] << "\n";
             }
         }
-        // Write the output to a file - Is 68 secounds faster than printing when we are using 3001 as size
+        output.close();
+        // Writing to a file is about 68 seconds faster than printing to the terminal when using a board size of 3001.
         //std::cout << output.str();
     }
 };
@@ -153,7 +163,8 @@ public:
     Board board;
     int number_of_knights;
     int turn = 0;
-    std::array<std::pair<int, int>, 8> knights_next_moves;
+    // Store the next square to check for each knight. There can be at most eight knights.
+    std::array<int, 8> knights_next_moves;
 
     Game(int number, int board_size)
         : board(board_size), number_of_knights(number) {
@@ -163,8 +174,9 @@ public:
 
     void initialize_next_moves() {
         for (int i = 0; i < number_of_knights; ++i) {
-            knights_next_moves[i].first = i; // Assign the color to the first element of the pair
-            knights_next_moves[i].second = 0;
+            // Start each knight at its own color index. Earlier squares have
+            // already been checked, so they do not need to be checked again.
+            knights_next_moves[i] = i;
         }
     }
 
@@ -184,7 +196,7 @@ public:
             return false;
         }
         const int color = turn;
-        int& square = knights_next_moves[turn].second;
+        int& square = knights_next_moves[turn];
 
         while (square < board.number_of_squares) {
             if (board.add_knight(square, color)) {
@@ -197,24 +209,26 @@ public:
         return false;
     }
 };
-// Most in this function is for timing
+// Most of the code in this function is used for timing the game and file output.
 int main() {
     const auto start = std::chrono::high_resolution_clock::now();
-    // Create the game
-    Game game(2, 3001); // Takes (number_of_knights, board_size) board size a grid with max number = size^2 - 1 recomend keeping it to odd numbers for better results
-    // Run the game
+    // Arguments: (number_of_knights, board_size). The board size is the length
+    // of one side, and odd sizes are recommended to match the spiral structure.
+    // 46339 is the largest size before the int calculations can overflow;
+    Game game(2, 3001); 
+    // Try to place knights until no more valid placements are possible.
     while (game.try_place_knight()) {
-        // Keep trying to place knights until no more can be placed
     }
     const auto end_of_game = std::chrono::high_resolution_clock::now();
     const std::chrono::duration<double> game_time = end_of_game - start;
-    game.board.print_knights(); // Output - It is changed to make a file for faster output
+    game.board.print_knights();
 
     const auto end = std::chrono::high_resolution_clock::now();
 
     const std::chrono::duration<double> print_time = end - end_of_game;
     const std::chrono::duration<double> total_time = end - start;
-
+    // Report the time spent on the game and on writing the output.
+    // These measurements are used for testing and optimization.
     std::cout << "Time spend on game: " << game_time.count() << " seconds" <<"\n";
     std::cout << "Time spend on printing: " << print_time.count() << " seconds" <<"\n";
     std::cout << "Time spend: " << total_time.count() << " seconds" <<"\n";
